@@ -3,7 +3,9 @@ package api_client
 import (
 	"net/http"
 	"fmt"
-	"time"
+    "time"
+    "strings"
+    "io/ioutil"
 )
 
 func Hello(name string) string {
@@ -29,73 +31,32 @@ func NewClient(baseUrl string, clientId string, secret string) *Client {
 	}
 }
 
-func (c *Client) sendRequest(method string, url string, ) error {
-	
-	// limit := 100
-    // page := 1
-    // if options != nil {
-    //     limit = options.Limit
-    //     page = options.Page
-    // }
+func (c *Client) SendRequest(method string, url string, data interface{}) ([]byte, error) {
+    
+    path := buildUrl(c.BaseURL, url)
+    req, err := http.NewRequest(method, path, nil)
+    if err != nil {
+        return nil, err
+    }
 
-    // req, err := http.NewRequest("GET", fmt.Sprintf("%s/faces?limit=%d&page=%d", c.BaseURL, limit, page), nil)
-    // if err != nil {
-    //     return nil, err
-    // }
+    req.Header.Set("Content-Type", "application/json")
 
-    // req = req.WithContext(ctx)
+    resp, err := c.HTTPClient.Do(req)
+    if err != nil {
+        return nil, err
+    }
 
-    // res := FacesList{}
-    // if err := c.sendRequest(req, &res); err != nil {
-    //     return nil, err
-    // }
+    defer resp.Body.Close()
 
-    // return &res, nil
-	
-	
-	
-	
-	// req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	// req.Header.Set("Accept", "application/json; charset=utf-8")
-	
-	// res, err := c.HTTPClient.Do(req)
-    // if err != nil {
-    //     return err
-    // }
-
-    // defer res.Body.Close()
-
-    // if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-    //     var errRes errorResponse
-    //     if err = json.NewDecoder(res.Body).Decode(&errRes); err == nil {
-    //         return errors.New(errRes.Message)
-    //     }
-
-    //     return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
-    // }
-
-    // fullResponse := successResponse{
-    //     Data: v,
-    // }
-    // if err = json.NewDecoder(res.Body).Decode(&fullResponse); err != nil {
-    //     return err
-    // }
-
-    // return nil
+    return ioutil.ReadAll(resp.Body)
 }
 
-type successResponse struct {
-	Code int `json:"code"`
-	Data string `json:"data"`
-}
+func buildUrl(baseUrl string, path string) string {
+    var pathBuilder strings.Builder
+    
+    pathBuilder.WriteString(baseUrl)
+    pathBuilder.WriteString("/")
+    pathBuilder.WriteString(path)
 
-type errorResponse struct {
-	Code int `json:"code"`
-	Message string `json:"message"`
-}
-
-type Request struct {
-	Method string `json:"method"`
-	Url string `json:"url"`
-	Data interface{}
+    return pathBuilder.String()
 }
