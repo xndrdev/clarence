@@ -1,17 +1,11 @@
-package api_client
+package clarence
 
 import (
 	"net/http"
-	"fmt"
     "time"
     "strings"
     "io/ioutil"
 )
-
-func Hello(name string) string {
-	message := fmt.Sprintf("hi, %v. Welcome!", name)
-	return message
-}
 
 type Client struct {
 	BaseURL string

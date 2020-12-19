@@ -1,3 +1,3 @@
-module xndr.dev/api_client
+module xndr.dev/clarence
 
 go 1.15
